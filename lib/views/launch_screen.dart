@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:mission_distributor/controllers/getX/connection_getX_controller.dart';
 import 'package:mission_distributor/controllers/storage/local/prefs/user_preference_controller.dart';
 import 'package:mission_distributor/core/res/routes.dart';
 import '../core/res/assets.dart';
@@ -14,22 +17,32 @@ class LaunchScreen extends StatefulWidget {
 class _LaunchScreenState extends State<LaunchScreen> {
   late double width;
   late double height;
+  ConnectionGetXController connectionGetXController = Get.put(ConnectionGetXController());
+
+  ConnectivityResult _connectionStatus = ConnectivityResult.values[1];
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   @override
   void initState() {
     super.initState();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     Future.delayed(
       const Duration(seconds: 2),
       () {
         String route = UserPreferenceController().loggedIn
             ? Routes.homeScreen
             : Routes.authenticationScreen;
-        Navigator.pushReplacementNamed(
-          context,
-          route
-        );
+        Navigator.pushReplacementNamed(context, route);
       },
     );
+  }
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+      print(_connectionStatus.name);
+    });
   }
 
   @override
@@ -69,7 +82,6 @@ class _LaunchScreenState extends State<LaunchScreen> {
                   width: imageWidth,
                   height: imageHeight,
                 ),
-
                 SizedBox(height: height / 10),
                 Image.asset(
                   Assets.launchScreenImage,

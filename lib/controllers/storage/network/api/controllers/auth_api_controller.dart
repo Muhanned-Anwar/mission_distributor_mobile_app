@@ -92,24 +92,29 @@ class AuthApiController with Helpers {
   }
 
   Future<void> updateProfile({
-    required String filePath,
+    required String? filePath,
     required UpdateProfile updateProfile,
     required User user,
   }) async {
     var url = Uri.parse(ApiSettings.updateProfile);
     var request = http.MultipartRequest('POST', url);
-    var file = await http.MultipartFile.fromPath('avatar', filePath);
-    request.files.add(file);
+    if(filePath != null) {
+      var file = await http.MultipartFile.fromPath('avatar', filePath);
+      request.files.add(file);
+    }
     request.headers[HttpHeaders.authorizationHeader] =
         AuthorizationHeader(token: token).token;
 
     request.fields['name'] = user.name.toString();
     request.fields['email'] = user.email;
     request.fields['mobile'] = user.mobile ?? '';
+    request.fields['dob'] = user.dob ?? '';
+    request.fields['gender'] = user.gender ?? '';
 
     var response = await request.send();
 
     response.stream.transform(utf8.decoder).listen((String event) {
+      print(response.statusCode );
       if (response.statusCode == 201 || response.statusCode == 200) {
         var jsonResponse = jsonDecode(event);
         User user = User.fromJson(jsonResponse['data']);
@@ -118,6 +123,7 @@ class AuthApiController with Helpers {
           user: user,
           message: jsonResponse['description'],
         );
+        UserPreferenceController().updateUserInformation(user: user);
       } else {
         updateProfile(
           status: false,

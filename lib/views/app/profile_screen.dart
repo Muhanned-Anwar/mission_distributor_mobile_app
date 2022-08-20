@@ -1,5 +1,10 @@
+import 'dart:async';
+
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:mission_distributor/controllers/getX/app_getX_controller.dart';
 import 'package:mission_distributor/controllers/getX/do_mission_getX_controller.dart';
@@ -32,55 +37,84 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
     fontWeight: FontWeight.w300,
   );
 
-  String? _selectedLanguage;
-  final _languagesList = ['العربية', 'English'];
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
+  late bool connection = false;
   @override
   void initState() {
     super.initState();
-    if (LanguageChangeNotifierGetX.to.languageCode == 'ar') {
-      _selectedLanguage = 'العربية';
-    } else {
-      _selectedLanguage = 'English';
+    testConnection();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+  }
+// Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException {
+      showSnackBar(context: context, message: 'Couldn\'t check connectivity status',error: true);
+      return;
     }
+
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) {
+      return Future.value(null);
+    }
+
+    return _updateConnectionStatus(result);
+  }
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+      if(result.name != 'none'){
+        connection = true;
+      }
+      print(_connectionStatus.name);
+    });
   }
 
   double itemSize = 800 / 6;
   double? _progressValue = 0;
 
+   testConnection()async{
+    final ConnectivityResult result = await Connectivity().checkConnectivity();
+    if (result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.wifi) {
+      connection = true;
+    } else {
+      connection = false;
+    }
+  }
   @override
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width;
     height = MediaQuery.of(context).size.height;
+    Future.delayed(
+      const Duration(milliseconds: 500),
+      () {
+          connection;
+      },
+    );
     return Scaffold(
+      backgroundColor: MissionDistributorColors.scaffoldBackground,
       appBar: AppBar(
         elevation: 0,
         backgroundColor: Colors.transparent,
-        title: const Text(
-          'Profile',
-          style: TextStyle(
-            color: MissionDistributorColors.primaryColor,
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
         centerTitle: true,
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(0),
-          child: Container(
-            // color: MissionDistributorColors.primaryColor,
-            // height: 0.5,
-            child: LinearProgressIndicator(
-              value: _progressValue,
-              backgroundColor: Colors.transparent,
-            ),
-          ),
-        ),
         actions: [
           IconButton(
             icon: const Icon(
               Icons.edit,
-              color: MissionDistributorColors.primaryColor,
+              color: Colors.white,
             ),
             onPressed: () {
               Navigator.pushReplacementNamed(context, Routes.editProfileScreen);
@@ -88,6 +122,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
           ),
         ],
       ),
+      extendBodyBehindAppBar: true,
       body: OrientationBuilder(
         builder: (context, orientation) {
           if (orientation == Orientation.portrait) {
@@ -95,413 +130,436 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
           } else {
             itemSize = height / 6;
           }
-          return ListView(
+          return Stack(
             children: [
-              SizedBox(height: height / 40),
-              Container(
-                margin: EdgeInsets.symmetric(horizontal: width / 14.2),
-                alignment: Alignment.center,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      child:
-                          UserPreferenceController().userInformation.avatar !=
-                                  ''
-                              ? Image.network(
-                                  UserPreferenceController()
-                                          .userInformation
-                                          .avatar ??
-                                      '',
-                                  height: height / 11.5,
-                                  width: height / 11.5,
-                                )
-                              : Image.asset(
-                                  Assets.profileImage,
-                                  fit: BoxFit.cover,
-                                  width: width / 5.5,
-                                  height: height / 11.5,
-                                ),
-                    ),
-                    SizedBox(height: height / 60),
-                    Text(
-                      UserPreferenceController().userInformation.name,
-                      style: _textStyle,
-                    ),
-                    SizedBox(height: height / 70),
-                    Text(
-                      UserPreferenceController().userInformation.mobile == ''
-                          ? 'There is no mobile number'
-                          : UserPreferenceController()
-                              .userInformation
-                              .mobile
-                              .toString(),
-                      style: _textStyle,
-                    ),
-                    SizedBox(height: height / 150),
-                    Text(
-                      UserPreferenceController().userInformation.email,
-                      style: _textStyle,
-                    ),
-                    SizedBox(height: height / 30),
-
-                  ],
+              SizedBox(
+                width: double.infinity,
+                child: Image.asset(
+                  Assets.bgMaskImage,
+                  fit: BoxFit.cover,
                 ),
               ),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(40),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 20,
-                      spreadRadius: 5,
+              Image.asset(
+                Assets.maskImage,
+              ),
+              ListView(
+                children: [
+                  SizedBox(height: height / 14),
+                  Container(
+                    height: height / 3.8,
+                    margin: EdgeInsets.symmetric(horizontal: width / 9),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    SizedBox(height: height / 40),
-                    Container(
-                      margin: EdgeInsets.symmetric(horizontal: width / 14.2),
-                      child: Column(
+                    child: Container(
+                      margin: EdgeInsets.symmetric(horizontal: width / 20),
+                      alignment: Alignment.center,
+                      child: ListView(
                         children: [
-                          Row(
-                            children: [
-                              MyElevatedButton(
-                                onPressed: () {},
-                                child: const Text(
-                                  'COINS',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: MissionDistributorColors.primaryColor,
-                                  ),
-                                ),
-                                borderSide: const BorderSide(
-                                  color: MissionDistributorColors.primaryColor,
-                                  width: 1,
-                                ),
-                                borderRadiusGeometry: BorderRadius.circular(14),
-                                width: width / 4,
-                                height: height / 25,
-                              ),
-                              SizedBox(width: width / 21),
-                              MyElevatedButton(
-                                onPressed: () {
-                                  Navigator.pushNamed(context, Routes.rankScreen);
-                                },
-                                child: const Text(
-                                  'RANK',
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: MissionDistributorColors.primaryColor,
-                                  ),
-                                ),
-                                borderSide: const BorderSide(
-                                  color: MissionDistributorColors.primaryColor,
-                                  width: 1,
-                                ),
-                                borderRadiusGeometry: BorderRadius.circular(14),
-                                width: width / 4,
-                                height: height / 25,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: height / 100),
-                          Row(
-                            children: [
-                              MyElevatedButton(
-                                onPressed: () {},
-                                child: Text(
-                                  MissionGetXController.to.points.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    MissionDistributorColors.primaryColor,
-                                    MissionDistributorColors.primaryColor,
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderSide: const BorderSide(
-                                  color: MissionDistributorColors.primaryColor,
-                                  width: 1,
-                                ),
-                                borderRadiusGeometry: BorderRadius.circular(14),
-                                width: width / 4,
-                                height: height / 25,
-                              ),
-                              SizedBox(width: width / 21),
-                              MyElevatedButton(
-                                onPressed: () {},
-                                child: Text(
-                                  AppGetXController.to.rank.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    MissionDistributorColors.primaryColor,
-                                    MissionDistributorColors.primaryColor,
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderSide: const BorderSide(
-                                  color: MissionDistributorColors.primaryColor,
-                                  width: 1,
-                                ),
-                                borderRadiusGeometry: BorderRadius.circular(14),
-                                width: width / 4,
-                                height: height / 25,
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: height / 50),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: width / 14.2),
-                      height: height / 12.86,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.shade200,
-                            blurRadius: 5,
-                            spreadRadius: 5,
-                          ),
-                        ],
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Image.asset(
-                            Assets.logo,
-                            width: width / 20,
-                            height: height / 40,
-                            color: MissionDistributorColors.primaryColor,
-                          ),
-                          SizedBox(width: width / 60),
-                          const Padding(
-                            padding: EdgeInsetsDirectional.only(top: 8),
-                            child: Text(
-                              'Missions zone',
-                              style: TextStyle(
-                                color: MissionDistributorColors.primaryColor,
-                                fontSize: 20,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: height / 25),
-                    MyElevatedButton(
-                      onPressed: () {},
-                      child: SizedBox(
-                        height: height / 12.86,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.lightbulb_outline,
-                              size: width / 20,
-                              color: MissionDistributorColors.primaryColor,
-                            ),
-                            SizedBox(width: width / 60),
-                            const Padding(
-                              padding: EdgeInsetsDirectional.only(top: 8),
-                              child: Text(
-                                'General Knowledge',
-                                style: TextStyle(
-                                  color: MissionDistributorColors.primaryColor,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    MyElevatedButton(
-                      onPressed: () {
-                        AppGetXController.to.changeSelectedBottomBarScreen(selectedIndex: 0);
-                      },
-                      child: SizedBox(
-                        height: height / 12.86,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.track_changes,
-                              size: width / 20,
-                              color: MissionDistributorColors.primaryColor,
-                            ),
-                            SizedBox(width: width / 60),
-                            const Padding(
-                              padding: EdgeInsetsDirectional.only(top: 8),
-                              child: Text(
-                                'Missions',
-                                style: TextStyle(
-                                  color: MissionDistributorColors.primaryColor,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    MyElevatedButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, Routes.walletScreen);
-                      },
-                      child: SizedBox(
-                        height: height / 12.86,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.wallet_giftcard,
-                              size: width / 20,
-                              color: MissionDistributorColors.primaryColor,
-                            ),
-                            SizedBox(width: width / 60),
-                            const Padding(
-                              padding: EdgeInsetsDirectional.only(top: 8),
-                              child: Text(
-                                'Wallet',
-                                style: TextStyle(
-                                  color: MissionDistributorColors.primaryColor,
-                                  fontSize: 20,
-                                ),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: width / 14.2),
-                      child: const Divider(
-                        color: MissionDistributorColors.primaryColor,
-                        thickness: 1,
-                      ),
-                    ),
-                    // SizedBox(height: height / 160),
-
-                    // Change Language
-                    SizedBox(
-                      width: double.infinity,
-                      height: itemSize,
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton2(
-                          customButton: Row(
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              SizedBox(
-                                width: width / 12.27,
+                              SizedBox(height: height / 80),
+                              Container(
+                                child: UserPreferenceController()
+                                            .userInformation
+                                            .avatar !=
+                                        ''
+                                    ?!connection ?Container( height: height / 11.5,
+                                  width: height / 11.5,): Image.network(
+                                        UserPreferenceController()
+                                                .userInformation
+                                                .avatar ??
+                                            '',
+                                        height: height / 11.5,
+                                        width: height / 11.5,
+                                      )
+                                    : Image.asset(
+                                        Assets.profileImage,
+                                        fit: BoxFit.cover,
+                                        width: width / 5.5,
+                                        height: height / 11.5,
+                                      ),
                               ),
-                              const Icon(
-                                Icons.language,
-                                color: MissionDistributorColors.primaryColor,
-                              ),
-                              SizedBox(width: width / 19.63),
+                              SizedBox(height: height / 200),
                               Text(
-                                AppLocalizations.of(context)!.lang,
+                                UserPreferenceController().userInformation.name,
                                 style: const TextStyle(
-                                  fontSize: 17,
-                                  color: MissionDistributorColors.primaryColor,
+                                  color: Colors.black,
+                                  fontSize: 20,
                                 ),
                               ),
-                              const Spacer(flex: 1),
+                              SizedBox(height: height / 150),
                               Text(
-                                _selectedLanguage ?? '',
-                                style:
-                                const TextStyle(fontSize: 13, color: Colors.grey),
+                                UserPreferenceController()
+                                    .userInformation
+                                    .email,
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 14,
+                                ),
                               ),
-                              SizedBox(width: width / 28),
-                              const Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 16,
-                                color: MissionDistributorColors.primaryColor,
+                              SizedBox(height: height / 60),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          // _selectedDoneMissions = true;
+                                        });
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Expanded(
+                                            flex: 3,
+                                            child: Container(
+                                              width: width / 10,
+                                              height: height / 22,
+                                              padding: const EdgeInsets.all(5),
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(
+                                                color: MissionDistributorColors
+                                                    .primaryColor,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: Image.asset(
+                                                Assets.totalEarningsIcon,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: width / 40),
+                                          Expanded(
+                                            flex: 7,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  AppLocalizations.of(context)!
+                                                      .total_earnings,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color:
+                                                        MissionDistributorColors
+                                                            .primaryColor,
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .only(end: width / 50),
+                                                  child: const Divider(
+                                                    color:
+                                                        MissionDistributorColors
+                                                            .primaryColor,
+                                                    thickness: 2,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${MissionGetXController.to.money.value}\$',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color:
+                                                        MissionDistributorColors
+                                                            .primaryColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: width / 60,
+                                  ),
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          // _selectedDoneMissions = true;
+                                        });
+                                      },
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          Expanded(
+                                            flex: 3,
+                                            child: Container(
+                                              width: width / 10,
+                                              height: height / 22,
+                                              padding: const EdgeInsets.all(5),
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(
+                                                color: MissionDistributorColors
+                                                    .primaryColor,
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                              child: Image.asset(
+                                                Assets.totalCoinsIcon,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: width / 40),
+                                          Expanded(
+                                            flex: 7,
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  AppLocalizations.of(context)!
+                                                      .total_earnings,
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color:
+                                                        MissionDistributorColors
+                                                            .primaryColor,
+                                                  ),
+                                                ),
+                                                Padding(
+                                                  padding: EdgeInsetsDirectional
+                                                      .only(end: width / 50),
+                                                  child: const Divider(
+                                                    color:
+                                                        MissionDistributorColors
+                                                            .primaryColor,
+                                                    thickness: 2,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  '${MissionGetXController.to.points.value}\$',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    color:
+                                                        MissionDistributorColors
+                                                            .primaryColor,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                              SizedBox(width: width / 10.9),
                             ],
                           ),
-                          items: _languagesList.map((String item) {
-                            return DropdownMenuItem<String>(
-                              value: item,
-                              child: Text(item),
-                            );
-                          }).toList(),
-                          isExpanded: true,
-                          value: _selectedLanguage,
-                          onChanged: (value) {
-                            setState(() {
-                              print(value);
-                              _selectedLanguage = value as String;
-                              if (value == 'English') {
-                                LanguageChangeNotifierGetX.to
-                                    .changeLanguage(languageCode: 'en');
-                              } else if (value == 'العربية') {
-                                LanguageChangeNotifierGetX.to
-                                    .changeLanguage(languageCode: 'ar');
-                              }
-                            });
+                        ],
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: height / 30,
+                  ),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: width / 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 2,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: height / 30),
+                        MyElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, Routes.editProfileScreen);
                           },
-                          buttonHeight: 40,
-                          itemHeight: 40,
+                          child: SizedBox(
+                            height: height / 12.86,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.person,
+                                  size: width / 20,
+                                  color: MissionDistributorColors.primaryColor,
+                                ),
+                                SizedBox(width: width / 30),
+                                Text(
+                                  AppLocalizations.of(context)!
+                                      .profile_information,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const Expanded(child: SizedBox()),
+                                Align(
+                                  alignment: AlignmentDirectional.topCenter,
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: width / 20,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
-
-                    // Logout
-                    ElevatedButton(
-                      onPressed: () async => signUp(),
-                      style: ElevatedButton.styleFrom(
-                        primary: Colors.transparent,
-                        elevation: 0,
-                      ),
-                      child: Container(
-                        alignment: Alignment.center,
-                        width: double.infinity,
-                        height: itemSize,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            SizedBox(
-                              width: width / 22,
+                        SizedBox(height: height / 80),
+                        MyElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, Routes.appLangScreen);
+                          },
+                          child: SizedBox(
+                            height: height / 12.86,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.language,
+                                  size: width / 20,
+                                  color: MissionDistributorColors.primaryColor,
+                                ),
+                                SizedBox(width: width / 30),
+                                Text(
+                                  AppLocalizations.of(context)!
+                                      .application_language,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const Expanded(child: SizedBox()),
+                                Align(
+                                  alignment: AlignmentDirectional.topCenter,
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: width / 20,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const Icon(
-                              Icons.logout,
-                              color: MissionDistributorColors.primaryColor,
-                            ),
-                            SizedBox(width: width / 19.63),
-                            Text(
-                              AppLocalizations.of(context)!.logout,
-                              style: const TextStyle(
-                                fontSize: 17,
-                                color: MissionDistributorColors.primaryColor,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
+                        SizedBox(height: height / 80),
+                        MyElevatedButton(
+                          onPressed: () {},
+                          child: SizedBox(
+                            height: height / 12.86,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.lock,
+                                  size: width / 20,
+                                  color: MissionDistributorColors.primaryColor,
+                                ),
+                                SizedBox(width: width / 30),
+                                Text(
+                                  AppLocalizations.of(context)!.password_change,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const Expanded(child: SizedBox()),
+                                Align(
+                                  alignment: AlignmentDirectional.topCenter,
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: width / 20,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              )
+                  ),
+                  SizedBox(height: height / 30),
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: width / 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 2,
+                          spreadRadius: 2,
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        SizedBox(height: height / 30),
+                        MyElevatedButton(
+                          onPressed: () async => await performLogout(),
+                          child: SizedBox(
+                            height: height / 12.86,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.logout,
+                                  size: width / 20,
+                                  color: MissionDistributorColors.primaryColor,
+                                ),
+                                SizedBox(width: width / 30),
+                                Text(
+                                  AppLocalizations.of(context)!.logout,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const Expanded(child: SizedBox()),
+                                Align(
+                                  alignment: AlignmentDirectional.topCenter,
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: width / 20,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ],
           );
         },
@@ -509,7 +567,89 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
     );
   }
 
-  Future signUp() async {
+  Future performLogout() async {
+    await testConnection();
+    if(connection){
+      showDialog(
+        context: context,
+        builder: (context) => Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Align(
+              alignment: AlignmentDirectional.topCenter,
+              child: CircularProgressIndicator(
+                value: _progressValue,
+                backgroundColor: Colors.transparent,
+              ),
+            ),
+            SizedBox(height: height / 4),
+            Center(
+              child: Container(
+                height: height / 7,
+                margin: EdgeInsets.symmetric(
+                  horizontal: width / 20,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(5),
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+
+                    Text(
+                      AppLocalizations.of(context)!.confirm_logout,
+                      style: const TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
+                    SizedBox(height: height / 50),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        MyElevatedButton(
+                          width: width / 2.5,
+                          borderRadiusGeometry: BorderRadius.circular(5),
+                          gradient: const LinearGradient(colors: [
+                            MissionDistributorColors.primaryColor,
+                            MissionDistributorColors.primaryColor,
+                          ]),
+                          onPressed: () async => await logout(),
+                          child: Text(
+                            AppLocalizations.of(context)!.logout,
+                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                          ),
+                        ),
+                        MyElevatedButton(
+                          width: width / 2.5,
+                          borderRadiusGeometry: BorderRadius.circular(5),
+                          gradient: const LinearGradient(colors: [
+                            Colors.grey,
+                            Colors.grey,
+                          ]),
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            AppLocalizations.of(context)!.cancel,
+                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                          ),
+                        ),
+                      ],
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }else{
+      showSnackBar(context: context, message: 'Please check your connection!',error: true);
+    }
+  }
+
+  Future logout() async {
     _changeProgressValue(value: null);
     showDialog(
       context: context,

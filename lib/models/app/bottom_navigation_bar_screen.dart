@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 class BottomNavigationBarScreen {
   final Widget widget;
   final String title;
-  final Icon icon;
+  final Widget icon;
 
   BottomNavigationBarScreen({
    required this.widget,

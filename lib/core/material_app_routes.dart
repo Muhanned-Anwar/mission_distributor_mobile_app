@@ -5,6 +5,7 @@ import 'package:mission_distributor/views/app/edit_profile_screen.dart';
 import 'package:mission_distributor/views/app/mission/mission_complete_screen.dart';
 import 'package:mission_distributor/views/app/mission/missions_screen.dart';
 import 'package:mission_distributor/views/app/home_screen.dart';
+import 'package:mission_distributor/views/app/settings/app_lang_screen.dart';
 import 'package:mission_distributor/views/app/wallet/done_screen.dart';
 import 'package:mission_distributor/views/app/wallet/rank_screen.dart';
 import 'package:mission_distributor/views/app/wallet/wallet_screen.dart';
@@ -30,6 +31,7 @@ class MaterialAppRoutes{
       '/statements_screen': (context) => const StatementsScreen(),
       '/rank_screen': (context) => const RankScreen(),
       '/done_screen': (context) => const DoneScreen(),
+      '/app_lang_screen': (context) => const AppLangScreen(),
     };
   }
 }

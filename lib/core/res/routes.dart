@@ -21,6 +21,6 @@ class Routes{
   static const String profileScreen = '/profile_screen';
   static const String changePasswordScreen = '/change_password_screen';
 
-  static const String aboutAppScreen = '/about_app_screen';
+  static const String appLangScreen = '/app_lang_screen';
 
 }

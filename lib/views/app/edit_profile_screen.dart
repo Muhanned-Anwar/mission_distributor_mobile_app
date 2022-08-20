@@ -50,19 +50,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
   String? _selectedGender;
   final _genderList = ['Male', 'Female'];
 
-  late String country;
-  String? _selectedCountry;
-  final _countryList = [
-    'Palestine',
-    'Jordan',
-    'Egypt',
-    'Syria',
-    'Iraq',
-    'Saudi Arabia',
-    'UAE',
-    'Kuwait',
-    'Diameter'
-  ];
+
   double itemSize = 392.72727272727275 / 6;
 
 
@@ -156,18 +144,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
       } else if (gender == 'Female') {
         _selectedGender = AppLocalizations.of(context)!.gender_female;
       }
-      if(country != ''){
-        _selectedCountry = country;
-      }
     }
     _genderList[0] = AppLocalizations.of(context)!.gender_male;
     _genderList[1] = AppLocalizations.of(context)!.gender_female;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: MissionDistributorColors.scaffoldBackground,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         leading: Padding(
           padding: const EdgeInsetsDirectional.only(start: 18.7),
           child: IconButton(
@@ -191,6 +175,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
           AppLocalizations.of(context)!.edit_profile,
           style: const TextStyle(fontSize: 17, color: Colors.black),
         ),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
       ),
       body: OrientationBuilder(
         builder: (context, orientation) {
@@ -211,12 +200,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
             margin: EdgeInsets.symmetric(horizontal: width / 15.1),
             child: ListView(
               children: [
-                LinearProgressIndicator(
-                  value: _progressValue,
-                  color: MissionDistributorColors.primaryColor,
-                  backgroundColor: Colors.grey.shade400,
-                  minHeight: 1,
-                ),
                 SizedBox(height: height / 20),
 
                 // Profile Image
@@ -295,6 +278,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
                           width: 2,
                         ),
                       ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: const BorderSide(
+                          color: MissionDistributorColors.primaryColor,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -354,8 +343,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
                       errorText: _birthDateError,
                       errorBorder: UnderlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide(
-                          color: Colors.red.shade300,
+                        borderSide: const BorderSide(
+                          color: MissionDistributorColors.secondaryColor,
                           width: 2,
                         ),
                       ),
@@ -363,7 +352,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
                         onPressed: () {},
                         icon: const Icon(
                           Icons.arrow_forward_ios_rounded,
-                          color: Colors.pink,
+                          color: MissionDistributorColors.primaryColor,
                           size: 20,
                         ),
                       ),
@@ -386,29 +375,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
 
-                            Container(
-                              child: Image.asset(
-                                Assets.genderIcon,
-                              ),
+                            Image.asset(
+                              Assets.genderIcon,
                             ),
                             SizedBox(width: width / 19.63),
-                            Container(
-                              child: Text(
-                                AppLocalizations.of(context)!.gender,
-                                style: const TextStyle(fontSize: 17),
-                              ),
+                            Text(
+                              AppLocalizations.of(context)!.gender,
+                              style: const TextStyle(fontSize: 17),
                             ),
                             const Spacer(flex: 1),
                             Text(
                               _selectedGender ?? '',
-                              style: TextStyle(
+                              style: const TextStyle(
                                   fontSize: 13, color: Colors.grey),
                             ),
                             SizedBox(width: width / 28),
                             const Icon(
                               Icons.arrow_forward_ios_rounded,
                               size: 16,
-                              color: Colors.pink,
+                              color: MissionDistributorColors.primaryColor,
                             ),
                           ],
                         ),
@@ -453,17 +438,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
                   width: width / 1.57,
                   borderRadiusGeometry: BorderRadius.circular(10),
                   marginHorizontal: width / 8.72,
-                  borderSide: BorderSide(color: Colors.pink.shade100),
                   gradient: const LinearGradient(
                     colors: [
-                      MissionDistributorColors.thirdColor,
+                      MissionDistributorColors.primaryColor,
                       MissionDistributorColors.primaryColor,
                     ],
                   ),
                 ),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, Routes.changePasswordScreen);
+                    // Navigator.pushNamed(context, Routes.changePasswordScreen);
                   },
                   child: Text(AppLocalizations.of(context)!.change_password),
                 ),
@@ -561,8 +545,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
 
     if (_pickedFile != null) {
       user.avatar = _pickedFile!.path;
-    } else {
-      user.avatar = UserPreferenceController().userInformation.avatar;
+    } else  {
+      user.avatar = null;
     }
     return user;
   }
@@ -613,40 +597,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
       ),
     );
     AuthApiController().updateProfile(
-        filePath: user.avatar ?? '',
+        filePath: user.avatar,
         updateProfile: ({
           required String message,
           required bool status,
           User? user,
         }) {
           _changeProgressValue(value: status ? 1 : 0);
-
+          print(message);
+          print(status);
           if(status){
+            Navigator.pop(context);
             showSnackBar(
                 context: context,
                 message: AppLocalizations.of(context)!.profile_update_succeeded);
           }else{
             showSnackBar(
                 context: context,
-                message: AppLocalizations.of(context)!.profile_update_failed);
+                message: AppLocalizations.of(context)!.profile_update_failed,error: true);
           }
 
         },
         user: user);
-    //
-    // bool status = await FbFireStoreController()
-    //     .updateUser(context: context, customer: await readData());
-    // Navigator.pop(context);
-    // if (true) {
-    //   showSnackBar(
-    //       context: context,
-    //       message: AppLocalizations.of(context)!.profile_update_succeeded);
-    // } else {
-    //   showSnackBar(
-    //       context: context,
-    //       message: AppLocalizations.of(context)!.image_uploaded_failed,
-    //       error: true);
-    // }
   }
 
   Future<void> selectPhotoFromGallery() async {

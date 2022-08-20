@@ -39,6 +39,16 @@ class UserPreferenceController {
     _sharedPreferences.setString('gender', user.gender ?? '');
     _sharedPreferences.setString('token', token);
   }
+  Future<void> updateUserInformation({
+    required User user,
+  }) async {
+    _sharedPreferences.setString('id', user.id.toString());
+    _sharedPreferences.setString('name', user.name);
+    _sharedPreferences.setString('mobile', user.mobile ?? '');
+    _sharedPreferences.setString('avatar', user.avatar ?? '');
+    _sharedPreferences.setString('dob', user.dob ?? '');
+    _sharedPreferences.setString('gender', user.gender ?? '');
+  }
 
   Future<void> saveUserCountry({
     required String country,

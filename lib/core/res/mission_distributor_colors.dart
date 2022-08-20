@@ -7,6 +7,7 @@ class MissionDistributorColors {
   static const blue = Colors.blue;
   static const textFieldColor = Color(0xffFfFfFf);
   static const scaffoldBackground = Color(0xffF5F7F8);
+  static const cardColor = Color(0xff32E0FD);
 
 
 }

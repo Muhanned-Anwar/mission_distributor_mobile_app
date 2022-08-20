@@ -6,6 +6,12 @@ class Assets {
   static const String googleIcon = 'assets/app_icons/google.png';
   static const String payTmWalletIcon= 'assets/app_icons/pay_tm_icon.png';
   static const String genderIcon = 'assets/app_icons/gender.png';
+  static const String logoBottomNavBarIcon = 'assets/app_icons/logoBottomNavBar.png';
+  static const String logoBottomNavBarActiveIcon = 'assets/app_icons/logoBottomNavBarActive.png';
+  static const String totalEarningsIcon = 'assets/app_icons/total_earnings.png';
+  static const String totalCoinsIcon = 'assets/app_icons/total_coins.png';
+  static const String overallAchievementIcon = 'assets/app_icons/overall_achievement.png';
+  static const String remainingMissionsIcon = 'assets/app_icons/remaining_missions.png';
 
 
   static const String profileImage = 'assets/app_images/profile_image.png';
@@ -23,5 +29,7 @@ class Assets {
   static const String launchScreenImage = 'assets/app_images/launch_screen.png';
   static const String authBackgroundImage = 'assets/app_images/authBackground.png';
   static const String authImage = 'assets/app_images/auth.png';
+  static const String maskImage = 'assets/app_images/mask.png';
+  static const String bgMaskImage = 'assets/app_images/bg_mask.png';
 
 }
