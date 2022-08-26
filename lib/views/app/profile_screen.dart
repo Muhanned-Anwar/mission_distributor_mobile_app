@@ -42,6 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
   late bool connection = false;
+
   @override
   void initState() {
     super.initState();
@@ -50,6 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
     _connectivitySubscription =
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
+
 // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initConnectivity() async {
     late ConnectivityResult result;
@@ -57,10 +59,12 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
     try {
       result = await _connectivity.checkConnectivity();
     } on PlatformException {
-      showSnackBar(context: context, message: 'Couldn\'t check connectivity status',error: true);
+      showSnackBar(
+          context: context,
+          message: 'Couldn\'t check connectivity status',
+          error: true);
       return;
     }
-
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -75,7 +79,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
     setState(() {
       _connectionStatus = result;
-      if(result.name != 'none'){
+      if (result.name != 'none') {
         connection = true;
       }
       print(_connectionStatus.name);
@@ -85,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
   double itemSize = 800 / 6;
   double? _progressValue = 0;
 
-   testConnection()async{
+  testConnection() async {
     final ConnectivityResult result = await Connectivity().checkConnectivity();
     if (result == ConnectivityResult.mobile ||
         result == ConnectivityResult.wifi) {
@@ -94,6 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
       connection = false;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width;
@@ -101,7 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
     Future.delayed(
       const Duration(milliseconds: 500),
       () {
-          connection;
+        connection;
       },
     );
     return Scaffold(
@@ -174,15 +179,19 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                                             .userInformation
                                             .avatar !=
                                         ''
-                                    ?!connection ?Container( height: height / 11.5,
-                                  width: height / 11.5,): Image.network(
-                                        UserPreferenceController()
-                                                .userInformation
-                                                .avatar ??
-                                            '',
-                                        height: height / 11.5,
-                                        width: height / 11.5,
-                                      )
+                                    ? !connection
+                                        ? Container(
+                                            height: height / 11.5,
+                                            width: height / 11.5,
+                                          )
+                                        : Image.network(
+                                            UserPreferenceController()
+                                                    .userInformation
+                                                    .avatar ??
+                                                '',
+                                            height: height / 11.5,
+                                            width: height / 11.5,
+                                          )
                                     : Image.asset(
                                         Assets.profileImage,
                                         fit: BoxFit.cover,
@@ -215,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                                     child: InkWell(
                                       onTap: () {
                                         setState(() {
-                                          // _selectedDoneMissions = true;
+                                          Navigator.pushNamed(context, Routes.rankScreen);
                                         });
                                       },
                                       child: Row(
@@ -293,7 +302,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                                     child: InkWell(
                                       onTap: () {
                                         setState(() {
-                                          // _selectedDoneMissions = true;
+                                          Navigator.pushNamed(context, Routes.rankScreen);
                                         });
                                       },
                                       child: Row(
@@ -393,7 +402,8 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                         SizedBox(height: height / 30),
                         MyElevatedButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, Routes.editProfileScreen);
+                            Navigator.pushNamed(
+                                context, Routes.editProfileScreen);
                           },
                           child: SizedBox(
                             height: height / 12.86,
@@ -468,7 +478,9 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                         ),
                         SizedBox(height: height / 80),
                         MyElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.pushNamed(context, Routes.changePasswordScreen);
+                          },
                           child: SizedBox(
                             height: height / 12.86,
                             child: Row(
@@ -481,7 +493,44 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                                 ),
                                 SizedBox(width: width / 30),
                                 Text(
-                                  AppLocalizations.of(context)!.password_change,
+                                  AppLocalizations.of(context)!.change_password,
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                const Expanded(child: SizedBox()),
+                                Align(
+                                  alignment: AlignmentDirectional.topCenter,
+                                  child: Icon(
+                                    Icons.arrow_forward_ios,
+                                    size: width / 20,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: height / 80),
+                        MyElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, Routes.rankScreen);
+                          },
+                          child: SizedBox(
+                            height: height / 12.86,
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Icon(
+                                  Icons.workspace_premium_sharp,
+                                  size: width / 20,
+                                  color: MissionDistributorColors.primaryColor,
+                                ),
+                                SizedBox(width: width / 30),
+                                Text(
+                                  AppLocalizations.of(context)!.ranking,
                                   style: const TextStyle(
                                     color: Colors.black,
                                     fontWeight: FontWeight.normal,
@@ -569,7 +618,7 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
 
   Future performLogout() async {
     await testConnection();
-    if(connection){
+    if (connection) {
       showDialog(
         context: context,
         builder: (context) => Column(
@@ -596,7 +645,6 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-
                     Text(
                       AppLocalizations.of(context)!.confirm_logout,
                       style: const TextStyle(
@@ -617,7 +665,8 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                           onPressed: () async => await logout(),
                           child: Text(
                             AppLocalizations.of(context)!.logout,
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 15),
                           ),
                         ),
                         MyElevatedButton(
@@ -632,7 +681,8 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
                           },
                           child: Text(
                             AppLocalizations.of(context)!.cancel,
-                            style: const TextStyle(color: Colors.white, fontSize: 15),
+                            style: const TextStyle(
+                                color: Colors.white, fontSize: 15),
                           ),
                         ),
                       ],
@@ -644,8 +694,11 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
           ],
         ),
       );
-    }else{
-      showSnackBar(context: context, message: 'Please check your connection!',error: true);
+    } else {
+      showSnackBar(
+          context: context,
+          message: 'Please check your connection!',
+          error: true);
     }
   }
 
@@ -653,7 +706,9 @@ class _ProfileScreenState extends State<ProfileScreen> with Helpers {
     _changeProgressValue(value: null);
     showDialog(
       context: context,
-      builder: (context) => const Center(),
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
     );
     bool status = await AuthApiController().logout(context);
     _changeProgressValue(value: status ? 1 : 0);

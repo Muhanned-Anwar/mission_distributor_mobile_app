@@ -20,7 +20,7 @@ class User {
     name = json['name'];
     email = json['email'];
     emailVerifiedAt = json['email_verified_at'];
-    avatar = NetworkLink(link: json['avatar']).link;
+    avatar = NetworkLink(link: json['avatar'] ?? '').link;
     mobile = json['mobile'];
     dob = json['dob'];
     gender = json['gender'];

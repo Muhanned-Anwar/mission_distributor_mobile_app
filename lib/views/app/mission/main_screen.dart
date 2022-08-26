@@ -24,7 +24,7 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with Helpers{
+class _MainScreenState extends State<MainScreen> with Helpers {
   late double width;
   late double height;
   String done = '0';
@@ -50,6 +50,7 @@ class _MainScreenState extends State<MainScreen> with Helpers{
     _connectivitySubscription =
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
   }
+
 // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initConnectivity() async {
     late ConnectivityResult result;
@@ -57,10 +58,12 @@ class _MainScreenState extends State<MainScreen> with Helpers{
     try {
       result = await _connectivity.checkConnectivity();
     } on PlatformException {
-      showSnackBar(context: context, message: 'Couldn\'t check connectivity status',error: true);
+      showSnackBar(
+          context: context,
+          message: 'Couldn\'t check connectivity status',
+          error: true);
       return;
     }
-
 
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
@@ -71,7 +74,6 @@ class _MainScreenState extends State<MainScreen> with Helpers{
 
     return _updateConnectionStatus(result);
   }
-
 
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
     setState(() {
@@ -89,6 +91,8 @@ class _MainScreenState extends State<MainScreen> with Helpers{
     }
   }
 
+  bool isProgress = false;
+
   @override
   Widget build(BuildContext context) {
     width = MediaQuery.of(context).size.width;
@@ -96,7 +100,7 @@ class _MainScreenState extends State<MainScreen> with Helpers{
     Future.delayed(
       const Duration(milliseconds: 500),
       () {
-          connection;
+        connection;
       },
     );
     return Scaffold(
@@ -136,21 +140,22 @@ class _MainScreenState extends State<MainScreen> with Helpers{
                       alignment: Alignment.center,
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(50),
-                        child:
-                            UserPreferenceController().userInformation.avatar !=
-                                    ''
-                                ? !(_connectionStatus.name != 'none' || connection)
-                                    ? const Icon(Icons.person)
-                                    : Image.network(UserPreferenceController()
-                                            .userInformation
-                                            .avatar ??
-                                        '')
-                                : Image.asset(
-                                    Assets.profileImage,
-                                    fit: BoxFit.cover,
-                                    width: 60,
-                                    height: 60,
-                                  ),
+                        child: UserPreferenceController()
+                                    .userInformation
+                                    .avatar !=
+                                ''
+                            ? !(_connectionStatus.name != 'none' || connection)
+                                ? const Icon(Icons.person)
+                                : Image.network(UserPreferenceController()
+                                        .userInformation
+                                        .avatar ??
+                                    '')
+                            : Image.asset(
+                                Assets.profileImage,
+                                fit: BoxFit.cover,
+                                width: 60,
+                                height: 60,
+                              ),
                       ),
                     )
                   : Container(),
@@ -168,6 +173,8 @@ class _MainScreenState extends State<MainScreen> with Helpers{
         backgroundColor: MissionDistributorColors.secondaryColor,
         onRefresh: () async {
           MissionGetXController.to.read();
+          AppGetXController.to.readGifts();
+          AppGetXController.to.readRank();
         },
         child: OrientationBuilder(
           builder: (context, orientation) {
@@ -210,7 +217,8 @@ class _MainScreenState extends State<MainScreen> with Helpers{
                                   child: InkWell(
                                     onTap: () {
                                       setState(() {
-                                        // _selectedDoneMissions = true;
+                                        Navigator.pushNamed(
+                                            context, Routes.rankScreen);
                                       });
                                     },
                                     child: Container(
@@ -281,7 +289,8 @@ class _MainScreenState extends State<MainScreen> with Helpers{
                                   child: InkWell(
                                     onTap: () {
                                       setState(() {
-                                        // _selectedDoneMissions = true;
+                                        Navigator.pushNamed(
+                                            context, Routes.rankScreen);
                                       });
                                     },
                                     child: Container(
@@ -356,7 +365,8 @@ class _MainScreenState extends State<MainScreen> with Helpers{
                                   child: InkWell(
                                     onTap: () {
                                       setState(() {
-                                        // _selectedDoneMissions = true;
+                                        Navigator.pushNamed(
+                                            context, Routes.rankScreen);
                                       });
                                     },
                                     child: Container(
@@ -429,7 +439,8 @@ class _MainScreenState extends State<MainScreen> with Helpers{
                                   child: InkWell(
                                     onTap: () {
                                       setState(() {
-                                        // _selectedDoneMissions = true;
+                                        Navigator.pushNamed(
+                                            context, Routes.rankScreen);
                                       });
                                     },
                                     child: Container(
@@ -513,6 +524,14 @@ class _MainScreenState extends State<MainScreen> with Helpers{
                           height: height / 2.12,
                           child: GetX<MissionGetXController>(
                             builder: (controller) {
+                              Future.delayed(
+                                const Duration(seconds: 5),
+                                () {
+                                  setState(() {
+                                    isProgress = true;
+                                  });
+                                },
+                              );
                               List<Mission> _controller =
                                   controller.remainingMissions.value;
                               if (_controller.isNotEmpty) {
@@ -654,8 +673,15 @@ class _MainScreenState extends State<MainScreen> with Helpers{
                                   ],
                                 );
                               } else if (_controller.isEmpty) {
-                                return const Center(
-                                  child: Text('Not has Any Mission'),
+                                return Center(
+                                  child: Visibility(
+                                    visible: isProgress,
+                                    replacement:
+                                        const CircularProgressIndicator(),
+                                    child: const Center(
+                                      child: Text('Not has Any Mission'),
+                                    ),
+                                  ),
                                 );
                               } else {
                                 return const Center(

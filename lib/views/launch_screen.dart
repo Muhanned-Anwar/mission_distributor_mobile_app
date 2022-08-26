@@ -6,6 +6,9 @@ import 'package:mission_distributor/controllers/getX/connection_getX_controller.
 import 'package:mission_distributor/controllers/storage/local/prefs/user_preference_controller.dart';
 import 'package:mission_distributor/core/res/routes.dart';
 import '../core/res/assets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
+import '../core/res/mission_distributor_colors.dart';
 
 class LaunchScreen extends StatefulWidget {
   const LaunchScreen({Key? key}) : super(key: key);
@@ -17,7 +20,8 @@ class LaunchScreen extends StatefulWidget {
 class _LaunchScreenState extends State<LaunchScreen> {
   late double width;
   late double height;
-  ConnectionGetXController connectionGetXController = Get.put(ConnectionGetXController());
+  ConnectionGetXController connectionGetXController =
+      Get.put(ConnectionGetXController());
 
   ConnectivityResult _connectionStatus = ConnectivityResult.values[1];
   final Connectivity _connectivity = Connectivity();
@@ -38,10 +42,10 @@ class _LaunchScreenState extends State<LaunchScreen> {
       },
     );
   }
+
   Future<void> _updateConnectionStatus(ConnectivityResult result) async {
     setState(() {
       _connectionStatus = result;
-      print(_connectionStatus.name);
     });
   }
 
@@ -77,10 +81,17 @@ class _LaunchScreenState extends State<LaunchScreen> {
               children: [
                 SizedBox(height: height / 2.7),
                 Image.asset(
-                  Assets.logoLaunch,
+                  Assets.logo,
                   filterQuality: FilterQuality.high,
                   width: imageWidth,
                   height: imageHeight,
+                ),
+                Text(
+                  AppLocalizations.of(context)!.app_name,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    color: MissionDistributorColors.primaryColor,
+                  ),
                 ),
                 SizedBox(height: height / 10),
                 Image.asset(

@@ -7,15 +7,14 @@ import 'package:mission_distributor/controllers/storage/local/prefs/user_prefere
 import 'package:mission_distributor/models/auth/User.dart';
 import 'package:mission_distributor/models/auth/base_response.dart';
 import 'package:mission_distributor/models/authorization_header.dart';
-
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../../../core/utils/helpers.dart';
 import '../api_settings.dart';
 
-
 typedef UpdateProfile = void Function({
-required bool status,
-User? user,
-required String message,
+  required bool status,
+  User? user,
+  required String message,
 });
 
 class AuthApiController with Helpers {
@@ -98,7 +97,7 @@ class AuthApiController with Helpers {
   }) async {
     var url = Uri.parse(ApiSettings.updateProfile);
     var request = http.MultipartRequest('POST', url);
-    if(filePath != null) {
+    if (filePath != null) {
       var file = await http.MultipartFile.fromPath('avatar', filePath);
       request.files.add(file);
     }
@@ -114,7 +113,7 @@ class AuthApiController with Helpers {
     var response = await request.send();
 
     response.stream.transform(utf8.decoder).listen((String event) {
-      print(response.statusCode );
+      print(response.statusCode);
       if (response.statusCode == 201 || response.statusCode == 200) {
         var jsonResponse = jsonDecode(event);
         User user = User.fromJson(jsonResponse['data']);
@@ -131,5 +130,25 @@ class AuthApiController with Helpers {
         );
       }
     });
+  }
+
+  Future<bool> changePassword({
+    required String? oldPassword,
+    required String? newPassword,
+    required BuildContext context,
+  }) async {
+    var url = Uri.parse(ApiSettings.changePassword);
+    var response = await http.post(url, body: {
+      'old_password': oldPassword,
+      'password': newPassword,
+      'password_confirmation': newPassword,
+    }, headers: {
+      HttpHeaders.authorizationHeader: AuthorizationHeader(token: token).token,
+    });
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return true;
+    }
+
+    return false;
   }
 }

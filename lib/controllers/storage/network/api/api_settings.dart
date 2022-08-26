@@ -11,6 +11,7 @@ class ApiSettings{
   static const logout = _authURL + 'logout';
   static const register = _authURL + 'register';
   static const updateProfile = _authURL + 'update-profile';
+  static const changePassword = _authURL + 'change-password';
 
 
   static const missionURL = _apiURL + 'missions';

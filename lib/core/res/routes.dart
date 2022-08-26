@@ -22,5 +22,6 @@ class Routes{
   static const String changePasswordScreen = '/change_password_screen';
 
   static const String appLangScreen = '/app_lang_screen';
+  static const String walletScreenScreen = '/wallet_screen';
 
 }

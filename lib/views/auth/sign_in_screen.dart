@@ -45,6 +45,7 @@ class _SignInScreenState extends State<SignInScreen> with Helpers {
   double? _progressValue = 0;
 
   double buttonSize = 803.6363636363636 / 16;
+  bool _isObscure = true;
 
   @override
   Widget build(BuildContext context) {
@@ -173,30 +174,33 @@ class _SignInScreenState extends State<SignInScreen> with Helpers {
                       SizedBox(
                         height: height / 50,
                       ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox(
-                            width: width / 6,
-                            child: const Divider(
-                              color: Colors.grey,
-                              thickness: 1,
+                      SingleChildScrollView(
+                        scrollDirection: Axis.horizontal,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            SizedBox(
+                              width: width / 6,
+                              child: const Divider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
                             ),
-                          ),
-                          Text(
-                            AppLocalizations.of(context)!.register_by_email,
-                            style: const TextStyle(
-                              fontSize: 18,
+                            Text(
+                              AppLocalizations.of(context)!.register_by_email,
+                              style: const TextStyle(
+                                fontSize: 18,
+                              ),
                             ),
-                          ),
-                          SizedBox(
-                            width: width / 6,
-                            child: const Divider(
-                              color: Colors.grey,
-                              thickness: 1,
+                            SizedBox(
+                              width: width / 6,
+                              child: const Divider(
+                                color: Colors.grey,
+                                thickness: 1,
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                       SizedBox(
                         height: height / 17,
@@ -243,8 +247,17 @@ class _SignInScreenState extends State<SignInScreen> with Helpers {
                       TextField(
                         controller: _passwordTextController,
                         keyboardType: TextInputType.emailAddress,
-                        obscureText: true,
+                        obscureText: _isObscure,
                         decoration: InputDecoration(
+                          suffixIcon: IconButton(
+                              icon: Icon(!_isObscure
+                                  ? Icons.visibility
+                                  : Icons.visibility_off),
+                              onPressed: () {
+                                setState(() {
+                                  _isObscure = !_isObscure;
+                                });
+                              }),
                           hintText: AppLocalizations.of(context)!.password,
                           hintStyle: const TextStyle(
                             fontSize: 16,
@@ -433,7 +446,6 @@ class _SignInScreenState extends State<SignInScreen> with Helpers {
       email: _emailTextController.text.trim(),
       password: _passwordTextController.text.trim(),
     );
-    print(status);
     _changeProgressValue(value: status ? 1 : 0);
     if (status) {
       showSnackBar(

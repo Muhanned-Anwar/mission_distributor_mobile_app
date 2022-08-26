@@ -68,7 +68,7 @@ class DoMissionApiController with Helpers {
   }) async {
     var url = Uri.parse(ApiSettings.storeDoMissionURL);
     var request = http.MultipartRequest('POST', url);
-    var file = await http.MultipartFile.fromPath('image', filePath);
+    var file = await http.MultipartFile.fromPath('screen_shot', filePath);
     request.files.add(file);
     request.headers[HttpHeaders.authorizationHeader] =
         AuthorizationHeader(token: token).token;

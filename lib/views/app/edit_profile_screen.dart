@@ -447,7 +447,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> with Helpers {
                 ),
                 TextButton(
                   onPressed: () {
-                    // Navigator.pushNamed(context, Routes.changePasswordScreen);
+                    Navigator.pushNamed(context, Routes.changePasswordScreen);
                   },
                   child: Text(AppLocalizations.of(context)!.change_password),
                 ),

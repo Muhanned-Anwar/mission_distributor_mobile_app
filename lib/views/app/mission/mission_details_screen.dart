@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mission_distributor/controllers/getX/do_mission_getX_controller.dart';
 import 'package:mission_distributor/controllers/getX/mission_getX_controller.dart';
+import 'package:mission_distributor/core/utils/helpers.dart';
 import 'package:mission_distributor/models/missions/do_mission.dart';
 import 'package:mission_distributor/models/network_link.dart';
 import 'package:mission_distributor/models/url_link.dart';
@@ -15,6 +19,7 @@ import '../../../core/res/assets.dart';
 import '../../../core/res/mission_distributor_colors.dart';
 import '../../../core/widgets/MyElevatedButton.dart';
 import '../../../models/missions/mission.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // ignore: must_be_immutable
 class MissionDetailsScreen extends StatefulWidget {
@@ -26,7 +31,7 @@ class MissionDetailsScreen extends StatefulWidget {
   State<MissionDetailsScreen> createState() => _MissionDetailsScreenState();
 }
 
-class _MissionDetailsScreenState extends State<MissionDetailsScreen> {
+class _MissionDetailsScreenState extends State<MissionDetailsScreen> with Helpers {
   late double width;
   late double height;
   double buttonHeight = 803 / 23.74;
@@ -41,10 +46,46 @@ class _MissionDetailsScreenState extends State<MissionDetailsScreen> {
   XFile? pickedFile;
   String result = '';
   ImagePicker? imagePicker;
+  ConnectivityResult _connectionStatus = ConnectivityResult.none;
+  final Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
 
+  bool connection = false;
+
+// Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initConnectivity() async {
+    late ConnectivityResult result;
+    // Platform messages may fail, so we use a try/catch PlatformException.
+    try {
+      result = await _connectivity.checkConnectivity();
+    } on PlatformException {
+      showSnackBar(context: context, message: 'Couldn\'t check connectivity status',error: true);
+      return;
+    }
+
+
+    // If the widget was removed from the tree while the asynchronous platform
+    // message was in flight, we want to discard the reply rather than calling
+    // setState to update our non-existent appearance.
+    if (!mounted) {
+      return Future.value(null);
+    }
+
+    return _updateConnectionStatus(result);
+  }
+
+
+  Future<void> _updateConnectionStatus(ConnectivityResult result) async {
+    setState(() {
+      _connectionStatus = result;
+    });
+  }
   @override
   void initState() {
     super.initState();
+    initConnectivity();
+    _connectivitySubscription =
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     imagePicker = ImagePicker();
   }
 
@@ -57,8 +98,7 @@ class _MissionDetailsScreenState extends State<MissionDetailsScreen> {
     _url = Uri.parse(widget.mission.link);
     return Scaffold(
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: Container(
             decoration: BoxDecoration(
@@ -82,16 +122,22 @@ class _MissionDetailsScreenState extends State<MissionDetailsScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Mission Details',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context)!.mission,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
         centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
       ),
+      backgroundColor: MissionDistributorColors.scaffoldBackground,
       body: OrientationBuilder(
         builder: (context, orientation) {
           if (orientation == Orientation.portrait) {
@@ -100,75 +146,127 @@ class _MissionDetailsScreenState extends State<MissionDetailsScreen> {
             buttonHeight = height / 8;
           }
           return Container(
-            margin: EdgeInsets.symmetric(horizontal: width / 10.5),
+            margin: EdgeInsets.symmetric(horizontal: width / 20),
+            alignment: AlignmentDirectional.center,
             child: ListView(
               children: [
                 Container(
-                  height: height / 13,
-                  alignment: Alignment.center,
-                  padding: const EdgeInsetsDirectional.only(
-                      start: 20, end: 12, top: 5, bottom: 5),
+                  margin: EdgeInsetsDirectional.only(
+                    top: height / 70,
+                  ),
+                  height: height / 4.5,
+                  width: double.infinity,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: MissionDistributorColors.primaryColor,
+                    borderRadius:
+                    BorderRadius.circular(10),
+                    color: MissionDistributorColors
+                        .primaryColor,
                   ),
-                  child: Container(
-                    child: Text(
-                      widget.mission.title ?? 'No has title',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: height / 150),
-                Container(
-                  padding: const EdgeInsetsDirectional.only(
-                      start: 20, end: 20, top: 8, bottom: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: MissionDistributorColors.primaryColor,
-                  ),
-                  height: height / 5,
-                  alignment: Alignment.center,
-                  child: SingleChildScrollView(
-                    child: Text(
-                      widget.mission.description ?? 'No has description',
-                      textAlign: TextAlign.start,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(height: height / 60),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: Colors.blue,
-                  ),
-                  height: height / 3.2,
-                  child: widget.mission.images.isNotEmpty
-                      ? widget.mission.images[0].name.contains('http')
-                          ? Image.asset(
-                              Assets.missionImage,
-                              fit: BoxFit.fill,
-                            )
-                          : Image.network(
-                              NetworkLink(link: widget.mission.images[0].name)
-                                  .link,
-                              fit: BoxFit.fill,
-                            )
-                      : Image.asset(
-                          Assets.missionImage,
-                          fit: BoxFit.fill,
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius:
+                        BorderRadius.circular(10),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius:
+                            BorderRadius.circular(
+                              30,
+                            ),
+                          ),
+                          height: height / 4.5,
+                          width: double.infinity,
+                          child:  widget.mission
+                              .images
+                              .isNotEmpty
+                              ?  widget.mission
+                              .images[0]
+                              .name
+                              .contains('http')
+                              ? Image.asset(
+                            Assets.missionImage,
+                            fit: BoxFit.fill,
+                          )
+                              : Image.network(
+                            NetworkLink(
+                              link:  widget.mission
+                                  .images[0]
+                                  .name,
+                            ).link,
+                            fit: BoxFit.fill,
+                          )
+                              : Image.asset(
+                            Assets.missionImage,
+                            fit: BoxFit.fill,
+                          ),
                         ),
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: AlignmentDirectional
+                                .topCenter,
+                            end: AlignmentDirectional
+                                .bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black
+                                  .withOpacity(0.5),
+                            ],
+                          ),
+                          borderRadius:
+                          BorderRadius.circular(10),
+                        ),
+                      ),
+                      Container(
+                        alignment: AlignmentDirectional
+                            .bottomStart,
+                        padding:
+                        EdgeInsetsDirectional.only(
+                          start: width / 20,
+                          end: width / 20,
+                          top: height / 160,
+                          bottom: height / 80,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius:
+                          BorderRadius.circular(25),
+                        ),
+                        child: Text(
+                          widget.mission.title ??
+                              AppLocalizations.of(
+                                  context)!
+                                  .no_has_title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 15,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
-                SizedBox(height: height / 50),
+                SizedBox(height: height / 100),
+                SingleChildScrollView(
+                  child: Text(
+                    widget.mission.description ?? 'No has description',
+                    textAlign: TextAlign.start,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                SizedBox(height: height / 20),
                 Container(
                   margin: EdgeInsetsDirectional.only(start: width / 15),
+                  padding: EdgeInsetsDirectional.only(top: height / 50,start: width / 15,bottom: height / 50,end: width / 15),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -184,7 +282,7 @@ class _MissionDetailsScreenState extends State<MissionDetailsScreen> {
                       Container(
                         child: widget.mission.steps.isNotEmpty
                             ? SizedBox(
-                                height: height / 7,
+                                height: height / 5,
                                 child: ListView.builder(
                                   itemCount: widget.mission.steps.length,
                                   itemBuilder: (context, index) {
@@ -345,35 +443,63 @@ class _MissionDetailsScreenState extends State<MissionDetailsScreen> {
       ),
     );
     String money = MissionGetXController.to.money.value;
-
-    doMissionGetXController.upload(
-      filePath: image,
-      doMission: DoMission(
-        date: DateTime.now().toString(),
-        missionId: widget.mission.id.toString(),
-        screenShot: image,
-      ),
-      imageUploadResponse: ({
-        required String message,
-        required bool status,
-        DoMission? doMission,
-      }) {
-        _changeProgressValue(value: status ? 1 : 0);
-        Navigator.of(context).pop();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MissionCompleteScreen(
-              money: money.toString(),
-              mission: widget.mission,
-              imageUrl: widget.mission.images.isNotEmpty
-                  ? widget.mission.images[0].name
-                  : Assets.missionImage,
-            ),
-          ),
-        );
-      },
-    );
+   await initConnectivity();
+    _connectivitySubscription = await
+        _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
+    if(_connectionStatus.name != 'none'){
+      doMissionGetXController.upload(
+        filePath: image,
+        doMission: DoMission(
+          date: DateTime.now().toString(),
+          missionId: widget.mission.id.toString(),
+          screenShot: image,
+        ),
+        imageUploadResponse: ({
+          required String message,
+          required bool status,
+          DoMission? doMission,
+        }) {
+          _changeProgressValue(value: status ? 1 : 0);
+          if(status){
+            showSnackBar(message: AppLocalizations.of(context)!.success_do_mission,context:context);
+            Navigator.of(context).pop();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MissionCompleteScreen(
+                  money: money.toString(),
+                  mission: widget.mission,
+                  imageUrl: widget.mission.images.isNotEmpty
+                      ? widget.mission.images[0].name
+                      : Assets.missionImage,
+                ),
+              ),
+            );
+          }else{
+            showSnackBar(message: message,context:context,error: true);
+            Navigator.of(context).pop();
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('Error'),
+                content: Text(message),
+                actions: <Widget>[
+                  FlatButton(
+                    child: const Text('OK'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                ],
+              ),
+            );
+          }
+        },
+      );
+    }else{
+      Navigator.pop(context);
+      showSnackBar(message: AppLocalizations.of(context)!.no_internet_connection,context:context,error: true);
+    }
     // Navigator.of(context).pop();
   }
 

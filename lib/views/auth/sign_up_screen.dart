@@ -50,6 +50,9 @@ class _SignUpScreenState extends State<SignUpScreen> with Helpers {
   double? _progressValue = 0;
   double buttonSize = 803.6363636363636 / 16;
   double bottomSizeBox = 803.6363636363636 / 3.4197;
+  bool _isObscure = true;
+  bool _isObscureConfirm = true;
+  bool _isObscureOld = true;
 
   @override
   Widget build(BuildContext context) {
@@ -182,8 +185,17 @@ class _SignUpScreenState extends State<SignUpScreen> with Helpers {
                     TextField(
                       controller: _passwordTextController,
                       keyboardType: TextInputType.visiblePassword,
+                      obscureText: _isObscure,
                       decoration: InputDecoration(
-                        hintText: AppLocalizations.of(context)!.password,
+                        suffixIcon: IconButton(
+                            icon: Icon(!_isObscure
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () {
+                              setState(() {
+                                _isObscure = !_isObscure;
+                              });
+                            }),                        hintText: AppLocalizations.of(context)!.password,
                         hintStyle: const TextStyle(
                           fontSize: 16,
                           color: Colors.grey,
@@ -219,8 +231,17 @@ class _SignUpScreenState extends State<SignUpScreen> with Helpers {
                     TextField(
                       controller: _confirmPasswordTextController,
                       keyboardType: TextInputType.visiblePassword,
+                      obscureText: _isObscureConfirm,
                       decoration: InputDecoration(
-                        hintText:
+                        suffixIcon: IconButton(
+                            icon: Icon(!_isObscureConfirm
+                                ? Icons.visibility
+                                : Icons.visibility_off),
+                            onPressed: () {
+                              setState(() {
+                                _isObscureConfirm = !_isObscureConfirm;
+                              });
+                            }),                        hintText:
                             AppLocalizations.of(context)!.confirm_password,
                         hintStyle: const TextStyle(
                           fontSize: 16,
@@ -440,7 +461,8 @@ class _SignUpScreenState extends State<SignUpScreen> with Helpers {
       showSnackBar(
           context: context,
           message: AppLocalizations.of(context)!.sign_up_successfully);
-      Navigator.pushReplacementNamed(context, Routes.signInScreen);
+      await login();
+      // Navigator.pushReplacementNamed(context, Routes.signInScreen);
     } else {
       showSnackBar(
           context: context,
@@ -449,4 +471,31 @@ class _SignUpScreenState extends State<SignUpScreen> with Helpers {
       Navigator.pop(context);
     }
   }
+
+  Future<void> login() async {
+    _changeProgressValue(value: null);
+    showDialog(
+      context: context,
+      builder: (context) => const Center(),
+    );
+    bool status = await AuthApiController().login(
+      email: _emailTextController.text.trim(),
+      password: _passwordTextController.text.trim(),
+    );
+    _changeProgressValue(value: status ? 1 : 0);
+    if (status) {
+      showSnackBar(
+          context: context,
+          message: AppLocalizations.of(context)!.login_successfully);
+      Navigator.pushNamedAndRemoveUntil(
+          context, Routes.homeScreen, (route) => false);
+    } else {
+      showSnackBar(
+          context: context,
+          message: AppLocalizations.of(context)!.login_failed,
+          error: true);
+      Navigator.pop(context);
+    }
+  }
+
 }

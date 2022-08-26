@@ -9,9 +9,12 @@ class Assets {
   static const String logoBottomNavBarIcon = 'assets/app_icons/logoBottomNavBar.png';
   static const String logoBottomNavBarActiveIcon = 'assets/app_icons/logoBottomNavBarActive.png';
   static const String totalEarningsIcon = 'assets/app_icons/total_earnings.png';
+  static const String totalEarningsIconWallet = 'assets/app_icons/total_earnings_wallet.png';
   static const String totalCoinsIcon = 'assets/app_icons/total_coins.png';
+  static const String totalCoinsIconWallet = 'assets/app_icons/total_coins_wallet.png';
   static const String overallAchievementIcon = 'assets/app_icons/overall_achievement.png';
   static const String remainingMissionsIcon = 'assets/app_icons/remaining_missions.png';
+  static const String giftIcon = 'assets/app_icons/gift.png';
 
 
   static const String profileImage = 'assets/app_images/profile_image.png';

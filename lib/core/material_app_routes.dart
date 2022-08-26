@@ -11,6 +11,7 @@ import 'package:mission_distributor/views/app/wallet/rank_screen.dart';
 import 'package:mission_distributor/views/app/wallet/wallet_screen.dart';
 import 'package:mission_distributor/views/app/wallet/statements_screen.dart';
 import 'package:mission_distributor/views/auth/authentication_screen.dart';
+import 'package:mission_distributor/views/auth/change_password_screen.dart';
 import 'package:mission_distributor/views/auth/forgot_password_screen.dart';
 import 'package:mission_distributor/views/auth/sign_in_screen.dart';
 import 'package:mission_distributor/views/auth/sign_up_screen.dart';
@@ -27,6 +28,7 @@ class MaterialAppRoutes{
       '/forgot_password_screen': (context) => const ForgotPasswordScreen(),
       '/home_screen': (context) => const HomeScreen(),
       '/edit_profile_screen': (context) => const EditProfileScreen(),
+      '/change_password_screen': (context) => const ChangePasswordScreen(),
       '/wallet_screen': (context) => const WalletScreen(),
       '/statements_screen': (context) => const StatementsScreen(),
       '/rank_screen': (context) => const RankScreen(),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:mission_distributor/controllers/getX/do_mission_getX_controller.dart';
@@ -9,8 +10,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/res/assets.dart';
 import '../../../core/res/assets.dart';
 import '../../../core/res/mission_distributor_colors.dart';
+import '../../../core/res/routes.dart';
 import '../../../models/network_link.dart';
 import '../../../models/url_link.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 // ignore: must_be_immutable
 class MissionCompleteScreen extends StatefulWidget {
@@ -39,7 +42,7 @@ class _MissionCompleteScreenState extends State<MissionCompleteScreen> {
 
   TextStyle textStyle = const TextStyle(
     color: MissionDistributorColors.primaryColor,
-    fontSize: 15,
+    fontSize: 13,
   );
   late String missionMoney = MissionGetXController.to.money.value;
   late double rate = MissionGetXController.to.rate.value;
@@ -59,13 +62,10 @@ class _MissionCompleteScreenState extends State<MissionCompleteScreen> {
     MissionGetXController.to.read();
     width = MediaQuery.of(context).size.width;
     height = MediaQuery.of(context).size.height;
-    print(rate);
-    print(widget.mission.points);
     return Scaffold(
-      backgroundColor: MissionDistributorColors.secondaryColor,
+      backgroundColor: MissionDistributorColors.scaffoldBackground,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: Container(
             decoration: BoxDecoration(
@@ -89,225 +89,335 @@ class _MissionCompleteScreenState extends State<MissionCompleteScreen> {
           ),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Mission Complete',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context)!.mission,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: MissionDistributorColors.primaryColor,
+            color: Colors.black,
           ),
         ),
         centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
       ),
       body: OrientationBuilder(
         builder: (context, orientation) {
           if (orientation == Orientation.portrait) {
-            buttonHeight = height / 23.74;
+            buttonHeight = height /18;
           } else {
             buttonHeight = height / 8;
           }
           return Container(
-            margin: EdgeInsets.symmetric(horizontal: width / 10.5),
+            margin: EdgeInsets.symmetric(horizontal: width / 20),
+            alignment: AlignmentDirectional.center,
             child: ListView(
               children: [
-                SizedBox(height: height / 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Column(
-                      children: [
-                        Text(
-                          'Total Points',
-                          style: textStyle,
-                        ),
-                        Obx(() {
-                          return Text(
-                            MissionGetXController.to.points.toString(),
-                            style: textStyle,
-                          );
-                        }),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Container(
-                          height: height / 12,
-                          width: width / 7,
+                Container(
+                  margin: EdgeInsetsDirectional.only(
+                    top: height / 70,
+                  ),
+                  height: height / 4.5,
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: MissionDistributorColors.primaryColor,
+                  ),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Container(
                           decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: MissionDistributorColors.primaryColor,
-                              width: 2,
+                            borderRadius: BorderRadius.circular(
+                              30,
                             ),
                           ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            '%${((100 / MissionGetXController.to.missionsCount.value.missionsCount) * MissionGetXController.to.missionsCount.value.completedMissionsCount).toString().split('.')[0]}',
-                            style: const TextStyle(
-                              color: MissionDistributorColors.primaryColor,
-                              fontSize: 14,
-                            ),
-                          ),
+                          height: height / 4.5,
+                          width: double.infinity,
+                          child: widget.mission.images.isNotEmpty
+                              ? widget.mission.images[0].name.contains('http')
+                                  ? Image.asset(
+                                      Assets.missionImage,
+                                      fit: BoxFit.fill,
+                                    )
+                                  : Image.network(
+                                      NetworkLink(
+                                        link: widget.mission.images[0].name,
+                                      ).link,
+                                      fit: BoxFit.fill,
+                                    )
+                              : Image.asset(
+                                  Assets.missionImage,
+                                  fit: BoxFit.fill,
+                                ),
                         ),
-                        Text(
-                          '${MissionGetXController.to.missionsCount.value.missionsCount}\\${MissionGetXController.to.missionsCount.value.completedMissionsCount}',
+                      ),
+                      Container(
+                        width: double.infinity,
+                        height: double.infinity,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: AlignmentDirectional.topCenter,
+                            end: AlignmentDirectional.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withOpacity(0.5),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      Container(
+                        alignment: AlignmentDirectional.bottomStart,
+                        padding: EdgeInsetsDirectional.only(
+                          start: width / 20,
+                          end: width / 20,
+                          top: height / 160,
+                          bottom: height / 80,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        child: Text(
+                          widget.mission.title ??
+                              AppLocalizations.of(context)!.no_has_title,
                           style: const TextStyle(
-                            color: MissionDistributorColors.primaryColor,
+                            color: Colors.white,
                             fontSize: 15,
                           ),
                         ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          'Wallet',
-                          style: textStyle,
-                        ),
-                        Text(
-                          (double.parse(widget.mission.points) / rate)
-                              .toString(),
-                          style: textStyle,
-                        ),
-                      ],
-                    ),
-                  ],
+                      )
+                    ],
+                  ),
                 ),
-                SizedBox(height: height / 25),
+                SizedBox(height: height / 100),
+                SingleChildScrollView(
+                  child: Text(
+                    widget.mission.description ?? AppLocalizations.of(context)!.no_has_description,
+                    textAlign: TextAlign.start,
+                    style: const TextStyle(
+                      color: Colors.black,
+                      fontSize: 20,
+                    ),
+                  ),
+                ),
+                SizedBox(height: height / 20),
                 Container(
-                  height: height / 5.352,
-                  padding: const EdgeInsetsDirectional.only(
-                      start: 20, end: 20, top: 5, bottom: 5),
+                  padding: EdgeInsetsDirectional.only(
+                      top: height / 50, start: width / 15, end: width / 15),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10),
                     color: Colors.white,
                   ),
-                  child: ListView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            widget.mission.title ?? '',
-                            style: const TextStyle(
-                              color: MissionDistributorColors.primaryColor,
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  Text(
+                                    '${AppLocalizations.of(context)!.points}: ',
+                                    style: textStyle,
+                                  ),
+                                  Text(
+                                    widget.mission.points.toString(),
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      color: Colors.black,
+                                    ),
+                                  )
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '${AppLocalizations.of(context)!.wallet}: ',
+                                    style: textStyle,
+                                  ),
+                                  Text(
+                                    '${(double.parse(widget.mission.points) / rate)}\$',
+                                    style: const TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Divider(
+                            color: Colors.grey,
+                            thickness: 0.5,
+                          ),
+                          SizedBox(height: height / 100),
+                          Row(
+                            children: [
+                              Container(
+                                height: height / 12,
+                                width: width / 7,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color:
+                                        MissionDistributorColors.primaryColor,
+                                    width: 2,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '%${((100 / MissionGetXController.to.missionsCount.value.missionsCount) * MissionGetXController.to.missionsCount.value.completedMissionsCount).toString().split('.')[0]}',
+                                  style: const TextStyle(
+                                    color:
+                                        MissionDistributorColors.primaryColor,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(width: width / 40),
+                              Text(
+                                '${MissionGetXController.to.missionsCount.value.missionsCount}\\${MissionGetXController.to.missionsCount.value.completedMissionsCount}',
+                                style: const TextStyle(
+                                  color: MissionDistributorColors.primaryColor,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
                           ),
                           SizedBox(height: height / 50),
                           Text(
-                            widget.mission.description ?? '',
-                            textAlign: TextAlign.center,
+                            AppLocalizations.of(context)!.general_knowledge,
                             style: const TextStyle(
                               color: MissionDistributorColors.primaryColor,
                               fontSize: 18,
-                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                          SizedBox(height: height / 70),
+                          Text(
+                            widget.mission.title ??
+                                AppLocalizations.of(context)!.no_has_title,
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontSize: 14,
                             ),
                           ),
                         ],
                       ),
+                      SizedBox(height: height / 100),
+                      const Align(
+                        alignment: AlignmentDirectional.bottomCenter,
+                        child: Divider(
+                          color: MissionDistributorColors.primaryColor,
+                          thickness: 2,
+                        ),
+                      ),
                     ],
                   ),
                 ),
-                SizedBox(height: height / 55),
+                SizedBox(height: height / 50),
                 Container(
-                  height: height / 18,
-                  padding: const EdgeInsetsDirectional.only(
-                      start: 20, end: 5, bottom: 5),
+                  padding: EdgeInsetsDirectional.only(
+                      top: height / 50, start: width / 15, end: width / 15),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    color: MissionDistributorColors.primaryColor,
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white,
                   ),
-                  child: GestureDetector(
-                    onTap: () async {
-                      await _launchUrl();
-                    },
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        SizedBox(
-                          width: width / 1.7,
-                          child: Text(
-                            widget.mission.link.contains('https://') ||
-                                widget.mission.link.contains('http://')
-                                ? widget.mission.link
-                                : UrlLink(link: widget.mission.link).link,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 15,
+                  child: Column(
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: width / 1.7,
+                            child: Text(
+                              widget.mission.link.contains('https://') ||
+                                      widget.mission.link.contains('http://')
+                                  ? widget.mission.link
+                                  : UrlLink(link: widget.mission.link).link,
+                              style: const TextStyle(
+                                color: MissionDistributorColors.primaryColor,
+                                fontSize: 15,
+                              ),
                             ),
                           ),
-                        ),
-                        const Icon(
-                          Icons.share,
-                          color: Colors.white,
-                        ),
-                        const SizedBox(width: 0),
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: height / 55),
-                Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.blue,
-                    ),
-                    height: height / 8.4,
-                    child: widget.mission.images.isNotEmpty
-                        ? widget.mission.images[0].name.contains('http')
-                            ? Image.asset(
-                                Assets.missionImage,
-                                fit: BoxFit.fill,
-                              )
-                            : Image.network(
-                                NetworkLink(link: widget.mission.images[0].name)
-                                    .link,
-                                fit: BoxFit.fill,
-                              )
-                        : Image.asset(
-                            Assets.missionImage,
-                            fit: BoxFit.fill,
-                          )),
-                SizedBox(height: height / 15),
-                Column(
-                  children: [
-                    Text(
-                      'POINTS',
-                      style: textStyle,
-                    ),
-                    Text(
-                      widget.mission.points.toString(),
-                      style: const TextStyle(
-                        fontSize: 36,
-                        color: MissionDistributorColors.primaryColor,
+                          const Icon(
+                            Icons.share,
+                            color: MissionDistributorColors.primaryColor,
+                          ),
+                          const SizedBox(width: 0),
+                        ],
                       ),
-                    )
-                  ],
-                ),
-                SizedBox(height: height / 15),
-                MyElevatedButton(
-                  onPressed: () async {
-                    Navigator.pushNamed(context, '/wallet_screen');
-                  },
-                  child: const Text(
-                    'Go Wallet',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  height: buttonHeight,
-                  width: width / 1.27,
-                  borderRadiusGeometry: BorderRadius.circular(20),
-                  gradient: const LinearGradient(
-                    colors: [
-                      MissionDistributorColors.primaryColor,
-                      MissionDistributorColors.primaryColor,
+                      SizedBox(height: height / 100),
+                      const Align(
+                        alignment: AlignmentDirectional.bottomCenter,
+                        child: Divider(
+                          color: MissionDistributorColors.primaryColor,
+                          thickness: 2,
+                        ),
+                      ),
                     ],
                   ),
+                ),
+                SizedBox(height: height / 40),
+                const Divider(
+                  color: Colors.grey,
+                  thickness: 0.5,
+                ),
+                SizedBox(height: height / 40),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '${AppLocalizations.of(context)!.total_points}: ',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                          ),
+                        ),
+                        Obx(() {
+                          return Text(
+                            MissionGetXController.to.points.toString(),
+                            style: const TextStyle(
+                              color: MissionDistributorColors.primaryColor,
+                              fontSize: 18,
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
+                    MyElevatedButton(
+                      onPressed: () async {
+                        Navigator.pushNamed(context, Routes.walletScreenScreen);
+                      },
+                      child: Text(
+                        AppLocalizations.of(context)!.go_wallet,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w300,
+                        ),
+                      ),
+                      height: buttonHeight,
+                      width: width / 2.5,
+                      borderRadiusGeometry: BorderRadius.circular(5),
+                      gradient: const LinearGradient(
+                        colors: [
+                          MissionDistributorColors.primaryColor,
+                          MissionDistributorColors.primaryColor,
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -1,15 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:mission_distributor/controllers/getX/do_mission_getX_controller.dart';
 import 'package:mission_distributor/controllers/getX/mission_getX_controller.dart';
 import 'package:mission_distributor/controllers/getX/payment_gateway_getX_controller.dart';
 import 'package:mission_distributor/core/res/assets.dart';
 import 'package:mission_distributor/core/res/routes.dart';
 import 'package:mission_distributor/models/network_link.dart';
-
 import '../../../core/res/mission_distributor_colors.dart';
 import '../../../core/widgets/MyElevatedButton.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({Key? key}) : super(key: key);
@@ -33,6 +32,7 @@ class _WalletScreenState extends State<WalletScreen> {
 
   final PaymentGatewayGetXController _paymentGatWayGetXController =
       Get.put(PaymentGatewayGetXController());
+  int selectedPayouts = -1;
 
   @override
   Widget build(BuildContext context) {
@@ -40,224 +40,369 @@ class _WalletScreenState extends State<WalletScreen> {
     height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: MissionDistributorColors.secondaryColor,
+      backgroundColor: MissionDistributorColors.scaffoldBackground,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(5),
-            margin: const EdgeInsetsDirectional.only(start: 10),
-            child: const Icon(
-              Icons.arrow_back_ios,
-              color: Colors.blue,
-              size: 18,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Wallet',
-          style: TextStyle(
-            fontSize: 36,
-            fontWeight: FontWeight.bold,
-            color: MissionDistributorColors.primaryColor,
+        backgroundColor: Colors.white,
+        title: Text(
+          AppLocalizations.of(context)!.wallet,
+          style: const TextStyle(
+            fontSize: 20,
+            color: Colors.black,
           ),
         ),
         centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: MissionDistributorColors.primaryColor,
+            size: 26,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: OrientationBuilder(
         builder: (context, orientation) {
           if (orientation == Orientation.portrait) {
-            buttonHeight = height / 18;
+            buttonHeight = height / 16;
           } else {
             buttonHeight = height / 8;
           }
           return Obx(() => ListView(
                 children: [
-                  Stack(
-                    alignment: AlignmentDirectional.topStart,
-                    children: [
-                      Align(
-                        alignment: Alignment.topCenter,
-                        child: Image.asset(Assets.wallet1Image),
+                  Container(
+                    margin: EdgeInsetsDirectional.only(
+                        top: height / 50, start: width / 20, end: width / 20),
+                    height: height / 1.1,
+                    alignment: AlignmentDirectional.topCenter,
+                    decoration: const BoxDecoration(
+                      borderRadius: BorderRadiusDirectional.only(
+                        topStart: Radius.circular(69),
+                        topEnd: Radius.circular(19),
                       ),
-                      Container(
-                        margin: EdgeInsetsDirectional.only(top: height / 6),
-                        height: height / 1.3,
-                        alignment: AlignmentDirectional.topCenter,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [
-                              MissionDistributorColors.primaryColor,
-                              MissionDistributorColors.thirdColor,
-                            ],
-                          ),
-                          borderRadius: BorderRadiusDirectional.only(
-                            topStart: Radius.circular(69),
-                            topEnd: Radius.circular(19),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
                           children: [
-                            // SizedBox(height: height / 15.43),
-                            // Row(
-                            //   mainAxisAlignment: MainAxisAlignment.center,
-                            //   children: [
-                            //     MyElevatedButton(
-                            //       onPressed: () async {
-                            //         Navigator.pushNamed(context, Routes.walletEarningScreen);
-                            //       },
-                            //       child: const Text(
-                            //         'My Earnings',
-                            //         style: TextStyle(
-                            //           fontSize: 18,
-                            //           fontWeight: FontWeight.w300,
-                            //         ),
-                            //       ),
-                            //       height: buttonHeight,
-                            //       width: width / 2.36,
-                            //       borderRadiusGeometry: BorderRadius.circular(27),
-                            //       borderSide: const BorderSide(
-                            //         color: Colors.white,
-                            //         width: 2,
-                            //       ),
-                            //     ),
-                            //     SizedBox(width: width / 90),
-                            //     MyElevatedButton(
-                            //       onPressed: () async {
-                            //         Navigator.pushNamed(context, Routes.walletTransactionScreen);
-                            //       },
-                            //       child: const Text(
-                            //         'Transactions',
-                            //         style: TextStyle(
-                            //           fontSize: 18,
-                            //           fontWeight: FontWeight.w300,
-                            //           color: MissionDistributorColors.primaryColor,
-                            //         ),
-                            //       ),
-                            //       height: buttonHeight,
-                            //       width: width / 2.36,
-                            //       borderRadiusGeometry: BorderRadius.circular(20),
-                            //       gradient: const LinearGradient(
-                            //         colors: [
-                            //           Colors.white,
-                            //           Colors.white,
-                            //         ],
-                            //       ),
-                            //     ),
-                            //   ],
-                            // ),
-                            SizedBox(height: height / 20),
-                            const Text(
-                              'Total Earnings',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Text(
-                              '\$ ${MissionGetXController.to.money}',
-                              style: const TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: height / 30),
-                            const Text(
-                              'Total Coins',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
-                              ),
-                            ),
-                            Text(
-                              MissionGetXController.to.points.toString(),
-                              style: const TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: height / 30),
-                            const Text(
-                              'Select Your Payout Option!!',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white,
-                              ),
-                            ),
-                            SizedBox(height: height / 30),
-                            SizedBox(
-                              height: height / 5,
-                              child: ListView.builder(
-                                itemCount: _paymentGatWayGetXController
-                                    .paymentGatWays.length,
-                                itemBuilder: (context, index) {
-                                  return Container(
-                                    margin: EdgeInsets.only(top: height / 50),
-                                    width: width / 2,
-                                    height: height / 20,
-                                    child: _paymentGatWayGetXController
-                                        .paymentGatWays.isNotEmpty
-                                        ? Image.network(
-                                      NetworkLink(
-                                          link:
-                                          _paymentGatWayGetXController
-                                              .paymentGatWays[
-                                          index]
-                                              .image ??
-                                              '')
-                                          .link,
-                                    )
-                                        : Image.asset(Assets.payTmWalletImage),
-                                  );
-                                },
-                              ),
-                            ),
-                            SizedBox(height: height / 30),
-                            MyElevatedButton(
-                              onPressed: () async {
-                                Navigator.pushNamed(
-                                    context, Routes.statementsScreen);
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  Navigator.pushNamed(context, Routes.rankScreen);
+                                });
                               },
-                              child: const Text(
-                                'Statements',
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w300,
+                              child: Container(
+                                height: height / 6,
+                                decoration: BoxDecoration(
+                                  color: MissionDistributorColors.primaryColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(5),
+                                        alignment: Alignment.center,
+                                        child: Image.asset(
+                                          Assets.totalCoinsIconWallet,
+                                          width: width / 6,
+                                          height: height / 15,
+                                          fit: BoxFit.fill,
+                                          filterQuality: FilterQuality.high,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 7,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            AppLocalizations.of(context)!
+                                                .total_coins,
+                                            style: const TextStyle(
+                                              fontSize: 22,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsetsDirectional.only(
+                                                end: width / 50),
+                                            child: const Divider(
+                                              color: Colors.white,
+                                              thickness: 3,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${MissionGetXController.to.points.value}',
+                                            style: const TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              height: buttonHeight,
-                              width: width / 2.2,
-                              borderRadiusGeometry: BorderRadius.circular(27),
-                              borderSide: const BorderSide(
-                                color: Colors.white,
-                                width: 2,
+                            ),
+                            SizedBox(
+                              height: height / 60,
+                            ),
+                            InkWell(
+                              onTap: () {
+                                setState(() {
+                                  Navigator.pushNamed(context, Routes.rankScreen);
+                                });
+                              },
+                              child: Container(
+                                height: height / 6,
+                                decoration: BoxDecoration(
+                                  color: MissionDistributorColors.cardColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Expanded(
+                                      flex: 3,
+                                      child: Container(
+                                        padding: const EdgeInsets.all(5),
+                                        alignment: Alignment.center,
+                                        child: Image.asset(
+                                          Assets.totalEarningsIconWallet,
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 7,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            AppLocalizations.of(context)!
+                                                .total_earnings,
+                                            style: const TextStyle(
+                                              fontSize: 22,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsetsDirectional.only(
+                                                end: width / 50),
+                                            child: const Divider(
+                                              color: Colors.white,
+                                              thickness: 3,
+                                            ),
+                                          ),
+                                          Text(
+                                            '${MissionGetXController.to.money.value}\$',
+                                            style: const TextStyle(
+                                              fontSize: 22,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ],
                         ),
-                      )
-                    ],
+                        SizedBox(height: height / 30),
+                         Text(
+                          '${AppLocalizations.of(context)!.select_option}!',
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        SizedBox(height: height / 200),
+                        Text(
+                          'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey.shade300,
+                          ),
+                        ),
+                        SizedBox(height: height / 30),
+                        Container(
+                          height: height / 4.5,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: ListView(
+                            children: [
+                              SizedBox(
+                                height: height / 6.5,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: width/40,vertical: height/140,),
+                                  child: ListView.builder(
+                                    itemCount: _paymentGatWayGetXController
+                                        .paymentGatWays.length,
+                                    itemBuilder: (context, index) {
+                                      return InkWell(
+                                        onTap: () {
+                                          setState(() {
+                                            selectedPayouts = index;
+                                          });
+                                        },
+                                        child: AnimatedContainer(
+                                          duration: const Duration(
+                                            milliseconds: 400,
+                                          ),
+                                          height: height / 15,
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: width / 70,
+                                            vertical: height / 80,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: selectedPayouts == index
+                                                ? Colors.grey.shade300:Colors.white,
+                                            borderRadius: BorderRadius.circular(10),
+                                          ),
+                                          child: Row(
+                                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Container(
+                                                width: width / 19,
+                                                height: height / 47.5,
+                                                margin:
+                                                    EdgeInsetsDirectional.only(
+                                                  start: width / 40,
+                                                ),
+                                                alignment: Alignment.center,
+                                                decoration: BoxDecoration(
+                                                  shape: BoxShape.circle,
+                                                  color:  selectedPayouts ==
+                                                      index
+                                                      ? MissionDistributorColors
+                                                      .primaryColor
+                                                      : Colors.grey,
+                                                ),
+                                                child: Container(
+                                                  width: width / 47.5,
+                                                  height: height / 110,
+                                                  decoration: const BoxDecoration(
+                                                    shape: BoxShape.circle,
+                                                    color: Colors.white,
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: width / 30),
+                                              Text(
+                                                  _paymentGatWayGetXController
+                                                      .paymentGatWays[index]
+                                                      .name),
+                                              const Spacer(),
+                                              SizedBox(
+                                                width: width / 5,
+                                                height: height / 15,
+                                                child:
+                                                    _paymentGatWayGetXController
+                                                            .paymentGatWays
+                                                            .isNotEmpty
+                                                        ? Image.network(
+                                                            NetworkLink(
+                                                                    link: _paymentGatWayGetXController
+                                                                            .paymentGatWays[
+                                                                                index]
+                                                                            .image ??
+                                                                        '')
+                                                                .link,
+                                                            fit: BoxFit.fill,
+                                                          )
+                                                        : Image.asset(Assets
+                                                            .payTmWalletImage),
+                                              ),
+                                              SizedBox(width: width / 30),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: height / 80),
+                              Container(
+                                margin:
+                                    EdgeInsets.symmetric(horizontal: width / 4),
+                                child: MyElevatedButton(
+                                  onPressed: () async {},
+                                  child: Text(
+                                    AppLocalizations.of(context)!.go,
+                                    style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w300,
+                                    ),
+                                  ),
+                                  height: buttonHeight / 1.4,
+                                  width: width / 3,
+                                  borderRadiusGeometry:
+                                      BorderRadius.circular(10),
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      MissionDistributorColors.primaryColor,
+                                      MissionDistributorColors.primaryColor,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: height / 15),
+                        MyElevatedButton(
+                          onPressed: () async {
+                            Navigator.pushNamed(
+                                context, Routes.statementsScreen);
+                          },
+                          child: Text(
+                            AppLocalizations.of(context)!.statements,
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                          height: buttonHeight,
+                          width: double.infinity,
+                          borderRadiusGeometry: BorderRadius.circular(10),
+                          gradient: const LinearGradient(
+                            colors: [
+                              MissionDistributorColors.primaryColor,
+                              MissionDistributorColors.primaryColor,
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ));

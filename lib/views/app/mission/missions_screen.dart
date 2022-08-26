@@ -45,6 +45,7 @@ class _MissionsScreenState extends State<MissionsScreen> with Helpers{
   @override
   void initState() {
     super.initState();
+    initConnectivity();
     testConnection();
     _connectivitySubscription =
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
@@ -87,6 +88,7 @@ class _MissionsScreenState extends State<MissionsScreen> with Helpers{
       connection = false;
     }
   }
+  bool isProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -186,63 +188,6 @@ class _MissionsScreenState extends State<MissionsScreen> with Helpers{
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Row(
-                      //   children: [
-                      //     CircleAvatar(
-                      //       radius: 30,
-                      //       child: Assets.profileImage != ''
-                      //           ? Align(
-                      //               alignment: Alignment.center,
-                      //               child: ClipRRect(
-                      //                 borderRadius: BorderRadius.circular(50),
-                      //                 child: UserPreferenceController()
-                      //                             .userInformation
-                      //                             .avatar !=
-                      //                         ''
-                      //                     ? Image.network(
-                      //                         UserPreferenceController()
-                      //                                 .userInformation
-                      //                                 .avatar ??
-                      //                             '')
-                      //                     : Image.asset(
-                      //                         Assets.profileImage,
-                      //                         fit: BoxFit.cover,
-                      //                         width: 60,
-                      //                         height: 60,
-                      //                       ),
-                      //               ),
-                      //             )
-                      //           : Container(),
-                      //     ),
-                      //     const SizedBox(width: 17),
-                      //     Text(
-                      //       UserPreferenceController().userInformation.name,
-                      //       style: const TextStyle(
-                      //         fontSize: 21,
-                      //         fontWeight: FontWeight.w400,
-                      //         color: MissionDistributorColors.primaryColor,
-                      //       ),
-                      //     ),
-                      //     const SizedBox(width: 7),
-                      //     Container(
-                      //       padding: const EdgeInsets.all(4),
-                      //       decoration: BoxDecoration(
-                      //         borderRadius: BorderRadius.circular(25),
-                      //         color: MissionDistributorColors.primaryColor,
-                      //       ),
-                      //       alignment: Alignment.center,
-                      //       child: Text(
-                      //         _missionGetXController.points.toString(),
-                      //         style: const TextStyle(
-                      //           fontSize: 14,
-                      //           fontWeight: FontWeight.w400,
-                      //           color: Colors.white,
-                      //         ),
-                      //       ),
-                      //     ),
-                      //   ],
-                      // ),
-                      // SizedBox(height: height / 29),
                       Container(
                         padding: const EdgeInsets.all(5),
                         decoration: BoxDecoration(
@@ -268,7 +213,7 @@ class _MissionsScreenState extends State<MissionsScreen> with Helpers{
                                         : Colors.transparent,
                                   ),
                                   child: Text(
-                                    'Done',
+                                    AppLocalizations.of(context)!.done,
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: _selectedDoneMissions
@@ -300,7 +245,7 @@ class _MissionsScreenState extends State<MissionsScreen> with Helpers{
                                         : Colors.transparent,
                                   ),
                                   child: Text(
-                                    'ToDo',
+                                    AppLocalizations.of(context)!.todo,
                                     style: TextStyle(
                                       fontSize: 16,
                                       color: !_selectedDoneMissions
@@ -320,6 +265,14 @@ class _MissionsScreenState extends State<MissionsScreen> with Helpers{
                         height: height / 1.395,
                         child: GetX<MissionGetXController>(
                           builder: (controller) {
+                            Future.delayed(
+                              const Duration(seconds: 5),
+                                  () {
+                                setState(() {
+                                  isProgress = true;
+                                });
+                              },
+                            );
                             List<Mission> _controller = _selectedDoneMissions
                                 ? controller.completedMissions.value
                                 : controller.remainingMissions.value;
@@ -458,8 +411,15 @@ class _MissionsScreenState extends State<MissionsScreen> with Helpers{
                                 ),
                               );
                             } else if (_controller.isEmpty) {
-                              return const Center(
-                                child: Text('Not has Any Mission'),
+                              return Center(
+                                child: Visibility(
+                                  visible: isProgress,
+                                  replacement:
+                                  const CircularProgressIndicator(),
+                                  child: const Center(
+                                    child: Text('Not has Any Mission'),
+                                  ),
+                            ),
                               );
                             } else {
                               return const Center(

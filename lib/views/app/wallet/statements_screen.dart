@@ -3,11 +3,9 @@ import 'package:get/get.dart';
 import 'package:mission_distributor/controllers/getX/payment_gateway_getX_controller.dart';
 import 'package:mission_distributor/models/missions/transaction.dart';
 import 'package:mission_distributor/models/payment/payout.dart';
-
-import '../../../controllers/getX/do_mission_getX_controller.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../../../controllers/getX/mission_getX_controller.dart';
 import '../../../core/res/mission_distributor_colors.dart';
-import '../../../core/res/routes.dart';
 import '../../../core/widgets/MyElevatedButton.dart';
 
 class StatementsScreen extends StatefulWidget {
@@ -54,42 +52,33 @@ class _StatementsScreenState extends State<StatementsScreen> {
     height = MediaQuery.of(context).size.height;
 
     return Scaffold(
-      backgroundColor: MissionDistributorColors.secondaryColor,
+      backgroundColor: MissionDistributorColors.scaffoldBackground,
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: MissionDistributorColors.primaryColor,
-        leading: IconButton(
-          icon: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(30),
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 10,
-                  spreadRadius: 5,
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.all(5),
-            margin: const EdgeInsetsDirectional.only(start: 10),
-            child: const Icon(
-              Icons.arrow_back_ios,
-              color: MissionDistributorColors.primaryColor,
-              size: 18,
-            ),
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: const Text(
-          'Statements',
-          style: TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+        backgroundColor: Colors.white,
+        title: Text(
+          AppLocalizations.of(context)!.statements,
+          style: const TextStyle(
+            fontSize: 20,
+            color: Colors.black,
           ),
         ),
         centerTitle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            bottom: Radius.circular(30),
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(
+            Icons.arrow_back_ios,
+            color: MissionDistributorColors.primaryColor,
+            size: 26,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
       ),
       body: OrientationBuilder(
         builder: (context, orientation) {
@@ -108,16 +97,32 @@ class _StatementsScreenState extends State<StatementsScreen> {
                     onPressed: () async {
                       // Navigator.pushNamed(context, Routes.rankScreen);
                     },
-                    child: Text(
-                      '${MissionGetXController.to.money} \$',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w300,
-                        color: MissionDistributorColors.primaryColor,
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          Text(
+                            '${AppLocalizations.of(context)!.wallet}: ',
+                            style:  TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w300,
+                              color: Colors.grey.shade300,
+                            ),
+                          ),
+                          Text(
+                            '${MissionGetXController.to.money} \$',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w300,
+                              color: MissionDistributorColors.primaryColor,
+                            ),
+                          ),
+
+                        ],
                       ),
                     ),
                     height: buttonHeight,
-                    width: width / 2.36,
+                    width: width / 2.2,
                     borderRadiusGeometry: BorderRadius.circular(27),
                     borderSide: const BorderSide(
                       color: Colors.white,
@@ -133,13 +138,25 @@ class _StatementsScreenState extends State<StatementsScreen> {
                     onPressed: () async {
                       // Navigator.pushNamed(context, Routes.statementsScreen);
                     },
-                    child: Text(
-                      MissionGetXController.to.points.toString(),
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w300,
-                        color: MissionDistributorColors.primaryColor,
-                      ),
+                    child: Row(
+                      children: [
+                        Text(
+                          '${AppLocalizations.of(context)!.points}: ',
+                          style:  TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w300,
+                            color: Colors.grey.shade300,
+                          ),
+                        ),
+                        Text(
+                          MissionGetXController.to.points.toString(),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w300,
+                            color: MissionDistributorColors.primaryColor,
+                          ),
+                        ),
+                      ],
                     ),
                     height: buttonHeight,
                     width: width / 2.36,
