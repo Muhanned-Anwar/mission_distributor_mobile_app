@@ -48,5 +48,11 @@
       <string>sms</string>
       <string>tel</string>
     </array>
+    <plist version="1.0">
+    <dict>
+        <key>CFBundleName</key>
+        <string>Subrate </string>  //here
+    </dict>
+    </plist>
 </dict>
 </plist>

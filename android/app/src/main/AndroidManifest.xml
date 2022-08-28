@@ -20,7 +20,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="mission_distributor"
+        android:label="Subrate"
         android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
@@ -29,7 +29,9 @@
             android:hardwareAccelerated="true"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
-            android:windowSoftInputMode="adjustResize">
+            android:windowSoftInputMode="adjustResize"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true">
             <!-- Specifies an Android theme to apply to this Activity as soon as
                  the Android process has started. This theme is visible to the user
                  while the Flutter UI initializes. After that, this theme continues

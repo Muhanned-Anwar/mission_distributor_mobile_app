@@ -26,6 +26,7 @@ class ApiSettings{
   static const rankUrl = _apiURL + 'my-rank';
   static const payoutsUrl = _apiURL + 'payouts';
   static const giftsUrl = _apiURL + 'gifts';
+  static const fcmTokenUpdateUrl = _apiURL + 'fcm_token_update';
 
 
 }

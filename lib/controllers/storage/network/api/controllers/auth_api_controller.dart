@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:mission_distributor/controllers/storage/local/prefs/user_preference_controller.dart';
@@ -149,6 +150,20 @@ class AuthApiController with Helpers {
       return true;
     }
 
+    return false;
+  }
+
+  Future<bool> updateFCMToken() async {
+    var url = Uri.parse(ApiSettings.fcmTokenUpdateUrl);
+    var fcmToken = await FirebaseMessaging.instance.getToken();
+    var response = await http.post(url, body: {
+      'fcm_token': fcmToken,
+    }, headers: {
+      HttpHeaders.authorizationHeader: AuthorizationHeader(token: token).token,
+    });
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      return true;
+    }
     return false;
   }
 }

@@ -451,6 +451,12 @@ class _SignInScreenState extends State<SignInScreen> with Helpers {
       showSnackBar(
           context: context,
           message: AppLocalizations.of(context)!.login_successfully);
+      bool updateToken = await AuthApiController().updateFCMToken();
+      if(updateToken){
+        // showSnackBar(context: context, message: 'Updated Fcm Token successfully');
+      }else{
+        // showSnackBar(context: context, message: 'Updated Fcm Token failed');
+      }
       Navigator.pushNamedAndRemoveUntil(
           context, Routes.homeScreen, (route) => false);
     } else {
